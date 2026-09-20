@@ -13,7 +13,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.artillexstudios.axplayerwarps.AxPlayerWarps.LANG;
 import static com.artillexstudios.axplayerwarps.AxPlayerWarps.MESSAGEUTILS;
@@ -24,13 +27,16 @@ import static com.artillexstudios.axplayerwarps.AxPlayerWarps.MESSAGEUTILS;
  */
 public final class SponsorManager {
 
+    /** Players with a payment on its way, so a double click cannot buy (and pay) twice. */
+    private static final Set<UUID> PENDING = ConcurrentHashMap.newKeySet();
+
     private SponsorManager() {
     }
 
     /** Ends sponsorships that ran out, and tells the owner if they are online. */
     public static void start() {
         Scheduler.get().runAsyncTimer(() -> {
-            for (Warp warp : WarpManager.getWarps()) {
+            for (Warp warp : WarpManager.snapshot()) {
                 if (warp.getSponsoredUntil() <= 0 || warp.isSponsored()) continue;
 
                 warp.clearSponsor();
@@ -62,41 +68,59 @@ public final class SponsorManager {
 
     /** Checks the rules and takes payment. Runs on the thread of the player who clicked. */
     public static void purchase(Player player, Warp warp, SponsorTier tier) {
-        if (!SponsorConfig.isEnabled()) {
-            MESSAGEUTILS.sendLang(player, "sponsor.errors.disabled");
-            return;
-        }
-        if (SponsorConfig.isOwnerOnly() && !warp.getOwner().equals(player.getUniqueId())) {
-            MESSAGEUTILS.sendLang(player, "errors.not-your-warp");
-            return;
-        }
-        if (!tier.permission().isEmpty() && !player.hasPermission(tier.permission())) {
-            MESSAGEUTILS.sendLang(player, "sponsor.errors.no-permission");
-            return;
-        }
+        if (!PENDING.add(player.getUniqueId())) return;
 
-        boolean extending = warp.isSponsored();
-        if (extending && !SponsorConfig.stackTime()) {
-            MESSAGEUTILS.sendLang(player, "sponsor.errors.already-sponsored", Map.of("%warp%", warp.getName()));
-            return;
+        boolean paying = false;
+        try {
+            paying = begin(player, warp, tier);
+        } finally {
+            if (!paying) PENDING.remove(player.getUniqueId());
         }
+    }
+
+    /** The reason a sponsorship cannot be bought right now, as a lang key, or null when it can. */
+    private static String blocked(Warp warp, SponsorTier tier) {
+        boolean extending = warp.isSponsored();
+        if (extending && !SponsorConfig.stackTime()) return "sponsor.errors.already-sponsored";
         if (!extending) {
             int maxSponsored = SponsorConfig.maxSponsored();
-            if (maxSponsored > 0 && WarpManager.getWarps().stream().filter(Warp::isSponsored).count() >= maxSponsored) {
-                MESSAGEUTILS.sendLang(player, "sponsor.errors.slots-full");
-                return;
+            if (maxSponsored > 0 && WarpManager.snapshot().stream().filter(Warp::isSponsored).count() >= maxSponsored) {
+                return "sponsor.errors.slots-full";
             }
             int maxPerPlayer = SponsorConfig.maxPerPlayer();
             if (maxPerPlayer > 0 && WarpManager.getWarps(warp.getOwner()).stream().filter(Warp::isSponsored).count() >= maxPerPlayer) {
-                MESSAGEUTILS.sendLang(player, "sponsor.errors.player-limit", Map.of("%limit%", "" + maxPerPlayer));
-                return;
+                return "sponsor.errors.player-limit";
             }
+        }
+        return null;
+    }
+
+    /** @return true when a payment was started: the player stays locked until it is finished */
+    private static boolean begin(Player player, Warp warp, SponsorTier tier) {
+        if (!SponsorConfig.isEnabled()) {
+            MESSAGEUTILS.sendLang(player, "sponsor.errors.disabled");
+            return false;
+        }
+        if (!WarpManager.snapshot().contains(warp)) return false;
+        if (SponsorConfig.isOwnerOnly() && !warp.getOwner().equals(player.getUniqueId())) {
+            MESSAGEUTILS.sendLang(player, "errors.not-your-warp");
+            return false;
+        }
+        if (!tier.permission().isEmpty() && !player.hasPermission(tier.permission())) {
+            MESSAGEUTILS.sendLang(player, "sponsor.errors.no-permission");
+            return false;
+        }
+
+        String reason = blocked(warp, tier);
+        if (reason != null) {
+            sendBlocked(player, warp, reason);
+            return false;
         }
 
         AxPlayerWarpsSponsorEvent event = new AxPlayerWarpsSponsorEvent(player, warp, tier.id(), tier.durationMillis(), tier.price());
         Bukkit.getServer().getPluginManager().callEvent(event);
-        if (event.isCancelled()) return;
-        double price = event.getPrice();
+        if (event.isCancelled()) return false;
+        double price = Math.max(0, event.getPrice());
 
         CurrencyIntegration integration = null;
         CompletableFuture<Boolean> payment = CompletableFuture.completedFuture(true);
@@ -104,42 +128,83 @@ public final class SponsorManager {
             integration = CurrencyIntegration.one(tier.currency());
             if (integration == null) {
                 MESSAGEUTILS.sendLang(player, "sponsor.errors.no-currency");
-                return;
+                return false;
             }
             if (integration.getBalance(player) < price) {
                 MESSAGEUTILS.sendLang(player, "sponsor.errors.not-enough-balance", Map.of(
                         "%price%", FormatUtils.formatCurrency(integration, price)
                 ));
-                return;
+                return false;
             }
             payment = integration.takeBalance(player.getUniqueId(), price);
         }
 
+        CurrencyIntegration paidWith = integration;
         String formattedPrice = price > 0 ? FormatUtils.formatCurrency(integration, price) : LANG.getString("placeholders.free");
-        payment.thenAccept(success -> {
-            if (!success) return;
+        payment.whenComplete((success, error) -> {
+            boolean granted = false;
+            String refusal = null;
+            try {
+                if (error != null || !Boolean.TRUE.equals(success)) return;
 
-            add(warp, tier.durationMillis(), tier.id());
-            player.closeInventory();
-            MESSAGEUTILS.sendLang(player, "sponsor.purchased", Map.of(
-                    "%warp%", warp.getName(),
-                    "%tier%", tier.id(),
-                    "%duration%", formatDuration(tier.durationMillis()),
-                    "%time_left%", formatDuration(warp.getSponsorRemaining()),
-                    "%price%", formattedPrice
-            ));
-
-            if (SponsorConfig.broadcast()) {
-                Map<String, String> replacements = Map.of(
-                        "%player%", player.getName(),
-                        "%warp%", warp.getName(),
-                        "%duration%", formatDuration(tier.durationMillis())
-                );
-                for (Player online : Bukkit.getOnlinePlayers()) {
-                    MESSAGEUTILS.sendLang(online, "sponsor.broadcast", replacements);
+                // The rules are checked again: things may have changed while the payment was on its way.
+                synchronized (SponsorManager.class) {
+                    if (!WarpManager.snapshot().contains(warp)) {
+                        refusal = "";
+                    } else {
+                        refusal = blocked(warp, tier);
+                        if (refusal == null) {
+                            add(warp, tier.durationMillis(), tier.id());
+                            granted = true;
+                        }
+                    }
                 }
+
+                if (!granted && paidWith != null && price > 0) {
+                    paidWith.giveBalance(player.getUniqueId(), price);
+                }
+            } finally {
+                PENDING.remove(player.getUniqueId());
             }
+
+            boolean done = granted;
+            String why = refusal;
+            Scheduler.get().run(player, task -> {
+                if (!done) {
+                    if (why != null && !why.isEmpty()) sendBlocked(player, warp, why);
+                    return;
+                }
+                player.closeInventory();
+                MESSAGEUTILS.sendLang(player, "sponsor.purchased", Map.of(
+                        "%warp%", warp.getName(),
+                        "%tier%", tier.id(),
+                        "%duration%", formatDuration(tier.durationMillis()),
+                        "%time_left%", formatDuration(warp.getSponsorRemaining()),
+                        "%price%", formattedPrice
+                ));
+
+                if (SponsorConfig.broadcast()) {
+                    Map<String, String> replacements = Map.of(
+                            "%player%", player.getName(),
+                            "%warp%", warp.getName(),
+                            "%duration%", formatDuration(tier.durationMillis())
+                    );
+                    for (Player online : Bukkit.getOnlinePlayers()) {
+                        MESSAGEUTILS.sendLang(online, "sponsor.broadcast", replacements);
+                    }
+                }
+            }, () -> {
+            });
         });
+        return true;
+    }
+
+    private static void sendBlocked(Player player, Warp warp, String key) {
+        Map<String, String> values = Map.of(
+                "%warp%", warp.getName(),
+                "%limit%", "" + SponsorConfig.maxPerPlayer()
+        );
+        MESSAGEUTILS.sendLang(player, key, values);
     }
 
     /** Adds time to a warp's sponsorship, or starts one. Used by purchases and by admins. */

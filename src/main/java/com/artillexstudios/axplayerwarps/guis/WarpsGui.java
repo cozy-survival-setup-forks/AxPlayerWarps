@@ -160,7 +160,7 @@ public class WarpsGui extends PaginatedGuiFrame {
         CompletableFuture<Void> future = new CompletableFuture<>();
 
         AsyncUtils.submit(() -> {
-            List<Warp> filtered = WarpManager.getWarps()
+            List<Warp> filtered = WarpManager.snapshot()
                     .stream()
                     .sorted(new WarpComparator(user.getSorting(), player))
                     .toList();

@@ -29,7 +29,7 @@ public class CommandManager {
         handler.getAutoCompleter().registerSuggestionFactory(parameter -> {
             if (parameter.hasAnnotation(AllWarps.class)) {
                 return (args, sender, command) -> {
-                    return WarpManager.getWarps().stream().map(Warp::getName).toList();
+                    return WarpManager.snapshot().stream().map(Warp::getName).toList();
                 };
             }
             if (parameter.hasAnnotation(OwnWarps.class)) {

@@ -27,7 +27,7 @@ public class CategoryManager {
                 categories.put(raw, category);
             }
 
-            for (Warp warp : WarpManager.getWarps()) {
+            for (Warp warp : WarpManager.snapshot()) {
                 Category curr = warp.getCategory();
                 if (curr == null) continue;
                 Category nw = categories.get(curr.raw());

@@ -55,7 +55,7 @@ public class AdminCommand implements OrphanCommand {
     public void deleteId(@NotNull CommandSender sender, int id) {
         AxPlayerWarps.getThreadedQueue().submit(() -> {
             Warp warp = null;
-            for (Warp w : WarpManager.getWarps()) {
+            for (Warp w : WarpManager.snapshot()) {
                 if (id != w.getId()) continue;
                 warp = w;
                 break;

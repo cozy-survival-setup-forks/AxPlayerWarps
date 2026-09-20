@@ -30,7 +30,7 @@ public class WorldManager {
             WorldManager.getWorlds().put(world, AxPlayerWarps.getDatabase().getWorldId(world));
         });
 
-        for (Warp warp : WarpManager.getWarps()) {
+        for (Warp warp : WarpManager.snapshot()) {
             if (!world.getName().equals(warp.getWorldName())) continue;
             warp.getLocation().setWorld(world);
         }

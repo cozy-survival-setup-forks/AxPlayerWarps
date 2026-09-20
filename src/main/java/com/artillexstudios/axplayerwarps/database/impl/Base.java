@@ -691,7 +691,7 @@ public class Base implements Database {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     int id = rs.getInt(1);
-                    WarpManager.getWarps()
+                    WarpManager.snapshot()
                             .stream().filter(warp -> warp.getId() == id)
                             .findAny().ifPresent(warps::add);
                 }
@@ -713,7 +713,7 @@ public class Base implements Database {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     int id = rs.getInt(1);
-                    WarpManager.getWarps()
+                    WarpManager.snapshot()
                             .stream().filter(warp -> warp.getId() == id)
                             .findAny().ifPresent(warps::add);
                 }
@@ -962,7 +962,7 @@ public class Base implements Database {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     int warpId = rs.getInt("warp_id");
-                    for (Warp warp : WarpManager.getWarps()) {
+                    for (Warp warp : WarpManager.snapshot()) {
                         if (warp.getId() != warpId) continue;
                         warp.setSponsor(rs.getLong("expires"), rs.getString("tier"));
                         break;

@@ -124,6 +124,8 @@ public enum Create {
 
         final double finalPrice = price;
         future.thenAccept(success -> {
+            if (!success) return;
+
             AxPlayerWarpsCreateEvent createEvent = new AxPlayerWarpsCreateEvent(sender, warp, finalPrice);
             Bukkit.getServer().getPluginManager().callEvent(createEvent);
 

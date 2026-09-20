@@ -22,6 +22,13 @@ public class WarpManager {
         return warps;
     }
 
+    /** A copy that is safe to loop over from any thread. */
+    public static List<Warp> snapshot() {
+        synchronized (warps) {
+            return new ArrayList<>(warps);
+        }
+    }
+
     public static List<Warp> getWarps(OfflinePlayer offlinePlayer) {
         return getWarps(offlinePlayer.getUniqueId());
     }
