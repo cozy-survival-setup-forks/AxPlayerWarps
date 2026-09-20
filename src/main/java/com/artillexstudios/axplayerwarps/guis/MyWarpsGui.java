@@ -20,6 +20,7 @@ import com.artillexstudios.axplayerwarps.input.InputManager;
 import com.artillexstudios.axplayerwarps.sorting.WarpComparator;
 import com.artillexstudios.axplayerwarps.user.Users;
 import com.artillexstudios.axplayerwarps.user.WarpUser;
+import com.artillexstudios.axplayerwarps.sponsor.SponsorLore;
 import com.artillexstudios.axplayerwarps.warps.Warp;
 import com.artillexstudios.axplayerwarps.warps.WarpManager;
 import net.kyori.adventure.text.Component;
@@ -170,12 +171,13 @@ public class MyWarpsGui extends PaginatedGuiFrame {
                 AsyncUtils.submit(() -> {
                     Material icon = warp.getIcon();
                     ItemBuilder builder = ItemBuilder.create(new ItemStack(icon));
-                    builder.setName(parseText(GUI.getString("warp.name"), warp));
+                    builder.setName(parseText(SponsorLore.name(GUI.getString("warp.name"), GUI.getString("warp.sponsored-name"), warp), warp));
+                if (warp.isSponsored() && GUI.getBoolean("warp.sponsored-glow", true)) builder.glow(true);
 
                     String[] description = warp.getDescription().split("\n", CONFIG.getInt("warp-description.max-lines", 3));
 
                     List<String> lore = new ArrayList<>();
-                    List<String> lore2 = new ArrayList<>(GUI.getStringList("warp.lore"));
+                    List<String> lore2 = SponsorLore.filter(GUI.getStringList("warp.lore"), warp);
                     for (int j = 0; j < lore2.size(); j++) {
                         String line = lore2.get(j);
                         if (!line.contains("%description%")) {

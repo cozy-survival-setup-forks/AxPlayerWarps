@@ -8,6 +8,7 @@ import com.artillexstudios.axplayerwarps.commands.subcommands.Edit;
 import com.artillexstudios.axplayerwarps.commands.subcommands.Help;
 import com.artillexstudios.axplayerwarps.commands.subcommands.Info;
 import com.artillexstudios.axplayerwarps.commands.subcommands.Open;
+import com.artillexstudios.axplayerwarps.commands.subcommands.Sponsor;
 import com.artillexstudios.axplayerwarps.warps.Warp;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -60,6 +61,12 @@ public class MainCommand implements OrphanCommand {
     @CommandPermission("axplayerwarps.edit")
     public void edit(@NotNull Player sender, @OwnWarps Warp warp) {
         Edit.INSTANCE.execute(sender, warp);
+    }
+
+    @Subcommand({"sponsor"})
+    @CommandPermission("axplayerwarps.sponsor")
+    public void sponsor(@NotNull Player sender, @Optional @OwnWarps Warp warp) {
+        Sponsor.INSTANCE.execute(sender, warp);
     }
 
     @Subcommand({"info"})

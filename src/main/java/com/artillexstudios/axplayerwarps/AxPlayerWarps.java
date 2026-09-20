@@ -30,7 +30,10 @@ import com.artillexstudios.axplayerwarps.guis.FavoritesGui;
 import com.artillexstudios.axplayerwarps.guis.MyWarpsGui;
 import com.artillexstudios.axplayerwarps.guis.RateWarpGui;
 import com.artillexstudios.axplayerwarps.guis.RecentsGui;
+import com.artillexstudios.axplayerwarps.guis.SponsorGui;
 import com.artillexstudios.axplayerwarps.guis.WarpsGui;
+import com.artillexstudios.axplayerwarps.sponsor.SponsorConfig;
+import com.artillexstudios.axplayerwarps.sponsor.SponsorManager;
 import com.artillexstudios.axplayerwarps.guis.WhitelistGui;
 import com.artillexstudios.axplayerwarps.hooks.HookManager;
 import com.artillexstudios.axplayerwarps.input.InputListener;
@@ -110,6 +113,8 @@ public final class AxPlayerWarps extends AxPlugin {
         GuiManager.registerGuiType("my-warps", MyWarpsGui.class);
         WhitelistGui.reload();
         BlacklistGui.reload();
+        SponsorConfig.load();
+        SponsorGui.reload();
 
         WarpPlaceholders.load();
 
@@ -132,6 +137,7 @@ public final class AxPlayerWarps extends AxPlugin {
 
         WarpManager.load();
         WarpQueue.start();
+        SponsorManager.start();
 
         getServer().getPluginManager().registerEvents(new WorldListeners(), this);
         getServer().getPluginManager().registerEvents(new PlayerListeners(), this);

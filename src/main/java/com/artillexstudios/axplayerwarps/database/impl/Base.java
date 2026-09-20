@@ -155,6 +155,15 @@ public class Base implements Database {
         """);
 
         execute("""
+                CREATE TABLE IF NOT EXISTS axplayerwarps_sponsors (
+                	warp_id INT NOT NULL,
+                	expires BIGINT NOT NULL,
+                	tier VARCHAR(128) DEFAULT null,
+                	PRIMARY KEY (warp_id)
+                );
+        """);
+
+        execute("""
                 CREATE TABLE IF NOT EXISTS axplayerwarps_blacklisted (
                 	id INT NOT NULL AUTO_INCREMENT,
                 	player_id INT NOT NULL,
@@ -534,6 +543,7 @@ public class Base implements Database {
         execute("DELETE FROM axplayerwarps_favorites WHERE warp_id = ?;", warp.getId());
         execute("DELETE FROM axplayerwarps_whitelisted WHERE warp_id = ?;", warp.getId());
         execute("DELETE FROM axplayerwarps_blacklisted WHERE warp_id = ?;", warp.getId());
+        execute("DELETE FROM axplayerwarps_sponsors WHERE warp_id = ?;", warp.getId());
 
         WarpManager.getWarps().remove(warp);
     }
@@ -941,6 +951,40 @@ public class Base implements Database {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+
+        loadSponsors();
+    }
+
+    private void loadSponsors() {
+        try (Connection conn = getConnection(); PreparedStatement stmt = createStatement(conn,
+                "SELECT warp_id, expires, tier FROM axplayerwarps_sponsors;")
+        ) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int warpId = rs.getInt("warp_id");
+                    for (Warp warp : WarpManager.getWarps()) {
+                        if (warp.getId() != warpId) continue;
+                        warp.setSponsor(rs.getLong("expires"), rs.getString("tier"));
+                        break;
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public void setSponsor(Warp warp, long expires, @Nullable String tier) {
+        ThreadUtils.checkNotMain("This method can only be called async!");
+        execute("DELETE FROM axplayerwarps_sponsors WHERE warp_id = ?;", warp.getId());
+        execute("INSERT INTO axplayerwarps_sponsors (warp_id, expires, tier) VALUES (?, ?, ?);", warp.getId(), expires, tier);
+    }
+
+    @Override
+    public void removeSponsor(Warp warp) {
+        ThreadUtils.checkNotMain("This method can only be called async!");
+        execute("DELETE FROM axplayerwarps_sponsors WHERE warp_id = ?;", warp.getId());
     }
 
     @Override

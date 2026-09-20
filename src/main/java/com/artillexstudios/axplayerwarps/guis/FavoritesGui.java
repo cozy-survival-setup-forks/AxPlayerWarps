@@ -16,6 +16,7 @@ import com.artillexstudios.axguiframework.replacements.Replacements;
 import com.artillexstudios.axplayerwarps.AxPlayerWarps;
 import com.artillexstudios.axplayerwarps.user.Users;
 import com.artillexstudios.axplayerwarps.user.WarpUser;
+import com.artillexstudios.axplayerwarps.sponsor.SponsorLore;
 import com.artillexstudios.axplayerwarps.warps.Warp;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -86,12 +87,13 @@ public class FavoritesGui extends PaginatedGuiFrame {
             for (Warp warp : user.getFavorites()) {
                 Material icon = warp.getIcon();
                 ItemBuilder builder = ItemBuilder.create(new ItemStack(icon));
-                builder.setName(parseText(GUI.getString("warp.name"), warp));
+                builder.setName(parseText(SponsorLore.name(GUI.getString("warp.name"), GUI.getString("warp.sponsored-name"), warp), warp));
+                if (warp.isSponsored() && GUI.getBoolean("warp.sponsored-glow", true)) builder.glow(true);
 
                 String[] description = warp.getDescription().split("\n", CONFIG.getInt("warp-description.max-lines", 3));
 
                 List<String> lore = new ArrayList<>();
-                List<String> lore2 = new ArrayList<>(GUI.getStringList("warp.lore"));
+                List<String> lore2 = SponsorLore.filter(GUI.getStringList("warp.lore"), warp);
                 for (int i = 0; i < lore2.size(); i++) {
                     String line = lore2.get(i);
                     if (!line.contains("%description%")) {

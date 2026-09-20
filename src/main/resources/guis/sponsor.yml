@@ -1,0 +1,69 @@
+# DOCUMENTATION: https://docs.artillex-studios.com/axplayerwarps.html
+# ITEM BUILDER: https://docs.artillex-studios.com/item-builder.html
+#
+# The prices, durations and items of the tiers are set in sponsor.yml, this file is for the look of the menu.
+
+title: "&0&lAxPWarps > &8Sponsor %warp%"
+# a gui can have 1-6 rows
+rows: 3
+# should the gui auto update?
+# in ticks, 20 ticks = 1 second
+# set to -1 to disable auto updater
+auto-update-ticks: -1
+
+# the slots that tiers without their own slot are placed in, in order
+tier-slots:
+  - "10-16"
+
+# the default lore of a tier item, a tier in sponsor.yml can set its own
+# placeholders: %tier%, %duration%, %price%, %warp%
+tier:
+  lore:
+    - "&#AAAAAASponsored Warp"
+    - " "
+    - "&#FFDD00Description:"
+    - "&fFeature your warp &#FFDD00%warp% &ffor &#FFDD00%duration%&f."
+    - " "
+    - "&#FFDD00● &fPrice: &#66FF66%price%"
+    - " "
+    - "&#FFDD00▶ &e&nCLICK&f to Purchase"
+
+# ----- ITEMS -----
+
+filler:
+  name: " "
+  slot:
+    - "0-9"
+    - "17-21"
+    - "23-26"
+  type: ORANGE_STAINED_GLASS_PANE
+
+info:
+  slot: 4
+  name: "&#FFAA00&lSPONSORED WARPS"
+  type: GOLDEN_HELMET
+  lore:
+    - " "
+    - " &fSponsored warps are shown first"
+    - " &fin the warp menu, so more players"
+    - " &fwill find yours!"
+    - " "
+    - "&#FFAA00Warp: &f%name%"
+    - "&#FFAA00Sponsored: &f%sponsored%"
+    - "&#FFAA00Time left: &f%sponsor_time_left%"
+  actions:
+    - "[SOUND] ui.button.click|1|1"
+
+back:
+  slot: 22
+  name: "&#FFAA00&lʙᴀᴄᴋ"
+  type: BARRIER
+  lore:
+    - " "
+    - " &fClick here to go back"
+    - " &fto the previous menu!"
+    - " "
+    - "&#FFAA00&lClick &#DDDDDD» &#FFDD99Go Back"
+  actions:
+    - "[BACK]"
+    - "[SOUND] ui.button.click|1|1"

@@ -7,6 +7,8 @@ import com.artillexstudios.axplayerwarps.commands.subcommands.Converter;
 import com.artillexstudios.axplayerwarps.commands.subcommands.Reload;
 import com.artillexstudios.axplayerwarps.enums.AccessList;
 import com.artillexstudios.axplayerwarps.enums.Converters;
+import com.artillexstudios.axplayerwarps.sponsor.SponsorManager;
+import com.artillexstudios.axplayerwarps.utils.TimeUtils;
 import com.artillexstudios.axplayerwarps.warps.Warp;
 import com.artillexstudios.axplayerwarps.warps.WarpManager;
 import org.bukkit.OfflinePlayer;
@@ -78,6 +80,36 @@ public class AdminCommand implements OrphanCommand {
 
             MESSAGEUTILS.sendLang(sender, "admin.setowner", Map.of("%warp%", warp.getName(), "%player%", player.getName() == null ? "---" : player.getName()));
         });
+    }
+
+    @Subcommand("sponsor")
+    @CommandPermission("axplayerwarps.admin.sponsor")
+    public void sponsor(@NotNull CommandSender sender, @AllWarps Warp warp, String duration) {
+        long millis;
+        try {
+            millis = TimeUtils.timeFromString(duration);
+        } catch (NumberFormatException ex) {
+            millis = 0;
+        }
+        if (millis <= 0) {
+            MESSAGEUTILS.sendLang(sender, "sponsor.errors.invalid-duration");
+            return;
+        }
+        SponsorManager.add(warp, millis, "admin");
+        MESSAGEUTILS.sendLang(sender, "sponsor.admin.given", Map.of(
+                "%warp%", warp.getName(),
+                "%duration%", SponsorManager.formatDuration(millis)
+        ));
+    }
+
+    @Subcommand("unsponsor")
+    @CommandPermission("axplayerwarps.admin.sponsor")
+    public void unsponsor(@NotNull CommandSender sender, @AllWarps Warp warp) {
+        if (!warp.isSponsored()) {
+            MESSAGEUTILS.sendLang(sender, "sponsor.errors.not-sponsored", Map.of("%warp%", warp.getName()));
+            return;
+        }
+        SponsorManager.remove(warp, sender);
     }
 
     @Subcommand("converter")

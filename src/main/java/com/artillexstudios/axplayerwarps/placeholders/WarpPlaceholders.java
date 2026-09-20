@@ -14,6 +14,7 @@ import com.artillexstudios.axplayerwarps.hooks.HookManager;
 import com.artillexstudios.axplayerwarps.placeholders.resolvers.WarpResolver;
 import com.artillexstudios.axplayerwarps.user.Users;
 import com.artillexstudios.axplayerwarps.user.WarpUser;
+import com.artillexstudios.axplayerwarps.sponsor.SponsorManager;
 import com.artillexstudios.axplayerwarps.utils.FormatUtils;
 import com.artillexstudios.axplayerwarps.utils.StarUtils;
 import com.artillexstudios.axplayerwarps.utils.TimeUtils;
@@ -240,6 +241,30 @@ public class WarpPlaceholders {
             Warp warp = getWarp(handler);
             if (warp == null) return empty;
             return String.valueOf(warp.getFavorites());
+        });
+
+        registerWarp("sponsored", handler -> {
+            Warp warp = getWarp(handler);
+            if (warp == null) return empty;
+            return LANG.getString(warp.isSponsored() ? "placeholders.sponsored" : "placeholders.not-sponsored");
+        });
+
+        registerWarp("sponsor_time_left", handler -> {
+            Warp warp = getWarp(handler);
+            if (warp == null || !warp.isSponsored()) return "---";
+            return SponsorManager.formatDuration(warp.getSponsorRemaining());
+        });
+
+        registerWarp("sponsor_until", handler -> {
+            Warp warp = getWarp(handler);
+            if (warp == null || !warp.isSponsored()) return "---";
+            return TimeUtils.formatDate(warp.getSponsoredUntil());
+        });
+
+        registerWarp("sponsor_tier", handler -> {
+            Warp warp = getWarp(handler);
+            if (warp == null || !warp.isSponsored() || warp.getSponsorTier() == null) return "---";
+            return warp.getSponsorTier();
         });
 
         registerWarp("icon", handler -> {

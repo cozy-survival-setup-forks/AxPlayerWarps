@@ -19,6 +19,8 @@ permissions:
     default: op
   axplayerwarps.create:
     default: true
+  axplayerwarps.sponsor:
+    default: true
   axplayerwarps.warps.1:
     default: true
   axplayerwarps.delay-bypass:
@@ -34,6 +36,8 @@ permissions:
   axplayerwarps.admin.converter:
     default: op
   axplayerwarps.admin.bypass:
+    default: op
+  axplayerwarps.admin.sponsor:
     default: op
 
 softdepend:

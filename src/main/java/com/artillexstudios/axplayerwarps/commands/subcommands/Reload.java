@@ -9,7 +9,9 @@ import com.artillexstudios.axplayerwarps.guis.FavoritesGui;
 import com.artillexstudios.axplayerwarps.guis.MyWarpsGui;
 import com.artillexstudios.axplayerwarps.guis.RateWarpGui;
 import com.artillexstudios.axplayerwarps.guis.RecentsGui;
+import com.artillexstudios.axplayerwarps.guis.SponsorGui;
 import com.artillexstudios.axplayerwarps.guis.WarpsGui;
+import com.artillexstudios.axplayerwarps.sponsor.SponsorConfig;
 import com.artillexstudios.axplayerwarps.guis.WhitelistGui;
 import com.artillexstudios.axplayerwarps.hooks.HookManager;
 import com.artillexstudios.axplayerwarps.placeholders.WarpPlaceholders;
@@ -115,6 +117,18 @@ public enum Reload {
             return;
         }
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33EEBB╠ &#99FFDDReloaded &fguis/my-warps.yml&#99FFDD!"));
+
+        if (!SponsorConfig.reload()) {
+            MESSAGEUTILS.sendLang(sender, "reload.failed", Map.of("%file%", "sponsor.yml"));
+            return;
+        }
+        Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33EEBB╠ &#99FFDDReloaded &fsponsor.yml&#99FFDD!"));
+
+        if (!SponsorGui.reload()) {
+            MESSAGEUTILS.sendLang(sender, "reload.failed", Map.of("%file%", "guis/sponsor.yml"));
+            return;
+        }
+        Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33EEBB╠ &#99FFDDReloaded &fguis/sponsor.yml&#99FFDD!"));
 
         WarpPlaceholders.reload();
         HookManager.updateHooks();

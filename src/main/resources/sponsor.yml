@@ -1,0 +1,71 @@
+# Sponsored warps are listed first in the warp menus and marked as sponsored until their time runs out.
+# Players buy a sponsorship for one of their warps with /pw sponsor [warp], or from the warp editor.
+# Admins can give or end one with /pwadmin sponsor <warp> <duration> and /pwadmin unsponsor <warp>.
+
+enabled: true
+
+# only the owner of a warp can sponsor it
+owner-only: true
+
+# how many warps can be sponsored at the same time, 0 for no limit
+max-sponsored-warps: 10
+
+# how many sponsored warps a single player can have at the same time, 0 for no limit
+max-per-player: 1
+
+# if a warp is already sponsored, does buying again add to the time left?
+# if disabled, a warp can only be sponsored again after the current sponsorship ended
+stack-time: true
+
+# should sponsored warps always be shown first, whatever the sorting is?
+pin-to-top: true
+
+# tell everyone on the server when a warp gets sponsored (the message is in lang.yml)
+broadcast: true
+
+# the currency used by tiers that do not set their own, currencies are defined in the currencies.yml
+currency: Vault
+
+# the sponsorships players can buy, you can add as many as you want
+# the name of a section is the id of the tier, it is used in placeholders and for the permission
+#
+# duration:   how long the warp is sponsored for, for example 30m, 4h, 1d, 1w or 1d12h
+# price:      what it costs, 0 for free
+# currency:   optional, uses the currency above if missing
+# material:   the item that represents the tier in the menu
+# name:       the name of the item
+# lore:       optional, the guis/sponsor.yml lore is used if missing
+#             placeholders: %tier%, %duration%, %price%, %warp%
+# slot:       optional, the slot in the menu (starting at 0), otherwise tiers fill the tier-slots from guis/sponsor.yml
+# glow:       optional, should the item glow?
+# permission: optional, players need this permission to buy the tier
+tiers:
+  4h:
+    duration: 4h
+    price: 50000
+    material: POTION
+    name: "&#FFAA00&l4 HOUR SPONSOR"
+  8h:
+    duration: 8h
+    price: 90000
+    material: SPLASH_POTION
+    name: "&#FFAA00&l8 HOUR SPONSOR"
+  16h:
+    duration: 16h
+    price: 160000
+    material: LINGERING_POTION
+    name: "&#FFAA00&l16 HOUR SPONSOR"
+  1d:
+    duration: 1d
+    price: 250000
+    material: EXPERIENCE_BOTTLE
+    name: "&#FFAA00&l1 DAY SPONSOR"
+  1w:
+    duration: 1w
+    price: 1500000
+    material: NETHER_STAR
+    name: "&#FF55FF&l1 WEEK SPONSOR"
+    glow: true
+
+# do not change this
+version: 1

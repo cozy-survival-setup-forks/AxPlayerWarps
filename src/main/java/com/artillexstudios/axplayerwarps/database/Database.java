@@ -111,6 +111,10 @@ public interface Database {
 
     List<Base.AccessPlayer> getAccessList(Warp warp, AccessList al);
 
+    void setSponsor(Warp warp, long expires, @Nullable String tier);
+
+    void removeSponsor(Warp warp);
+
     void loadWarps();
 
     void disable();

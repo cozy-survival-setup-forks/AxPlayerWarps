@@ -1,5 +1,6 @@
 package com.artillexstudios.axplayerwarps.sorting;
 
+import com.artillexstudios.axplayerwarps.sponsor.SponsorConfig;
 import com.artillexstudios.axplayerwarps.warps.Warp;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +18,13 @@ public class WarpComparator implements Comparator<Warp> {
 
     @Override
     public int compare(@NotNull Warp w1, @NotNull Warp w2) {
+        // Sponsored warps stay on top, whatever the sorting is.
+        if (SponsorConfig.isEnabled() && SponsorConfig.pinToTop()) {
+            boolean s1 = w1.isSponsored();
+            boolean s2 = w2.isSponsored();
+            if (s1 != s2) return s1 ? -1 : 1;
+        }
+
         return switch (sort.sorting()) {
             case ALPHABETICAL -> w1.getName().compareTo(w2.getName());
             case VISITS -> Integer.compare(w1.getUniqueVisits(), w2.getUniqueVisits());

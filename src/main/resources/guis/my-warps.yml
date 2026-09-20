@@ -15,7 +15,12 @@ auto-update-ticks: -1
 
 warp:
   name: "&#33EEBB&l%name%"
+  # the name and the glow of sponsored warps, remove them to show sponsored warps like the others
+  sponsored-name: "&#FFAA00&l★ &#FFDD55&l%name%"
+  sponsored-glow: true
   lore:
+    # lines with a %sponsor_...% placeholder are only shown for sponsored warps
+    - "&#FFAA00&lSPONSORED &#444444❙ &f%sponsor_time_left% left"
     - " "
     - "&#33EEBBDescription:"
     - "&#444444❙ &f%description%"

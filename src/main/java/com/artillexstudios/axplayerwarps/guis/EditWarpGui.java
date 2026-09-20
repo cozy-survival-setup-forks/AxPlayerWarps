@@ -26,6 +26,7 @@ import com.artillexstudios.axplayerwarps.input.InputManager;
 import com.artillexstudios.axplayerwarps.user.Users;
 import com.artillexstudios.axplayerwarps.user.WarpUser;
 import com.artillexstudios.axplayerwarps.utils.WarpNameUtils;
+import com.artillexstudios.axplayerwarps.sponsor.SponsorConfig;
 import com.artillexstudios.axplayerwarps.warps.Warp;
 import com.artillexstudios.axplayerwarps.warps.WarpManager;
 import net.kyori.adventure.text.Component;
@@ -88,6 +89,13 @@ public class EditWarpGui extends GuiFrame<Gui> {
     }
 
     public void open() {
+        if (SponsorConfig.isEnabled() && section.getSection("sponsor") != null) {
+            createItem("sponsor", event -> {
+                GuiActions.run(player, this, event, section.getStringList("sponsor.actions"));
+                new SponsorGui(player, warp).open();
+            });
+        }
+
         AxGuiItem guiItem = createItem("name-icon", event -> {
             GuiActions.run(player, this, event, section.getStringList("name-icon.actions"));
             if (event.isShiftClick() && event.isRightClick()) {

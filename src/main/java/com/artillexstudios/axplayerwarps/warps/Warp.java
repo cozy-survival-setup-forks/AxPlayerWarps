@@ -59,6 +59,8 @@ public class Warp {
     private List<Base.AccessPlayer> whitelisted = Collections.synchronizedList(new ArrayList<>());
     private List<Base.AccessPlayer> blacklisted = Collections.synchronizedList(new ArrayList<>());
     private final String worldName;
+    private volatile long sponsoredUntil = 0;
+    private volatile @Nullable String sponsorTier = null;
 
     public Warp(Integer id, long created, @Nullable String description, String name,
                 Location location, String worldName, @Nullable Category category,
@@ -83,6 +85,36 @@ public class Warp {
         this.earnedMoney = earnedMoney;
         this.icon = icon;
         if (id != null) setId(id);
+    }
+
+    /** Whether the warp is sponsored right now. */
+    public boolean isSponsored() {
+        return sponsoredUntil > System.currentTimeMillis();
+    }
+
+    /** When the sponsorship ends, in milliseconds since the epoch, or 0 if it never was sponsored. */
+    public long getSponsoredUntil() {
+        return sponsoredUntil;
+    }
+
+    /** How long the sponsorship has left, in milliseconds. */
+    public long getSponsorRemaining() {
+        return Math.max(0, sponsoredUntil - System.currentTimeMillis());
+    }
+
+    @Nullable
+    public String getSponsorTier() {
+        return sponsorTier;
+    }
+
+    public void setSponsor(long until, @Nullable String tier) {
+        this.sponsoredUntil = until;
+        this.sponsorTier = tier;
+    }
+
+    public void clearSponsor() {
+        this.sponsoredUntil = 0;
+        this.sponsorTier = null;
     }
 
     public int getId() {

@@ -205,6 +205,21 @@ bank:
   actions:
     - "[SOUND] ui.button.click|1|1"
 
+sponsor:
+  slot: 42
+  name: "&#FFAA00&lsᴘᴏɴsᴏʀ ᴡᴀʀᴘ"
+  type: GOLDEN_HELMET
+  lore:
+    - "&#AAAAAASponsored warps are shown first"
+    - "&#AAAAAAin the warp menu!"
+    - " "
+    - "&#FFAA00Currently sponsored: &f%sponsored%"
+    - "&#FFAA00Time left: &f%sponsor_time_left%"
+    - " "
+    - "&#FFAA00&lClick &#DDDDDD» &#FFDD99Sponsor this Warp"
+  actions:
+    - "[SOUND] ui.button.click|1|1"
+
 #decoration-example:
 #  slot: 10
 #  type: STONE

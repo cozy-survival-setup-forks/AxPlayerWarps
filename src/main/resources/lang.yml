@@ -9,6 +9,7 @@ help:
   - " <#33CCBB>➤ <white>/axpw edit <warp> <#DDDDDD>| <#BBFFDD>Open warp editor"
   - " <#33CCBB>➤ <white>/axpw warp <warp> <#DDDDDD>| <#BBFFDD>Teleport to warp"
   - " <#33CCBB>➤ <white>/axpw info <warp> <#DDDDDD>| <#BBFFDD>Warp information"
+  - " <#33CCBB>➤ <white>/axpw sponsor [warp] <#DDDDDD>| <#BBFFDD>Sponsor a warp"
   - " <#33CCBB>➤ <white>/axpw set <warp> <#DDDDDD>| <#BBFFDD>Update warp location"
   - " <#33CCBB>➤ <white>/axpw settings <warp> <#DDDDDD>| <#BBFFDD>Open warp settings"
   - " <#33CCBB>➤ <#44CCBB>/axpwadmin <#DDDDDD>| <#BBFFDD>Admin commands"
@@ -20,6 +21,8 @@ admin-help:
   - " <#33CCBB>➤ <white>/axpwadmin reload <#DDDDDD>| <#BBFFDD>Reload plugin"
   - " <#33CCBB>➤ <white>/axpwadmin delete <warp> <#DDDDDD>| <#BBFFDD>Delete warp"
   - " <#33CCBB>➤ <white>/axpwadmin setowner <warp> <player> <#DDDDDD>| <#BBFFDD>Set owner of warp"
+  - " <#33CCBB>➤ <white>/axpwadmin sponsor <warp> <duration> <#DDDDDD>| <#BBFFDD>Sponsor a warp for free"
+  - " <#33CCBB>➤ <white>/axpwadmin unsponsor <warp> <#DDDDDD>| <#BBFFDD>End the sponsorship of a warp"
   - " <#33CCBB>➤ <white>/axpwadmin converter <#DDDDDD>| <#BBFFDD>Convert data from another plugin"
   - " "
 
@@ -36,6 +39,8 @@ placeholders:
     bright: "&#FFFF00⭐"
     dark: "&#DDDDDD⭐"
   no-search: "---"
+  sponsored: "&#FFAA00Yes"
+  not-sponsored: "No"
   warp-not-found: "Warp not found"
 
 info:
@@ -144,6 +149,26 @@ errors:
   not-your-warp: "&#FF4444This is not your warp!"
   transfer-failed: "&#FF4444The &#FF0000%warp% &#FF4444warp couldn't be transferred as &#FF0000%player% &#FF4444has reached their warp limit or they are not accepting transfers!"
 
+sponsor:
+  purchased: "&#BBFFDDYour &#33EEBB%warp% &#BBFFDDwarp is now sponsored for &#33EEBB%duration%&#BBFFDD! It has &#33EEBB%time_left% &#BBFFDDleft. &#DDDDDD(%price%)"
+  broadcast: "&#FFAA00★ &#33EEBB%player% &#BBFFDDsponsored the &#33EEBB%warp% &#BBFFDDwarp for &#33EEBB%duration%&#BBFFDD! Visit it with &#33EEBB/pw warp %warp%"
+  expired: "&#BBFFDDThe sponsorship of your &#33EEBB%warp% &#BBFFDDwarp has ended."
+  admin:
+    given: "&#BBFFDDThe &#33EEBB%warp% &#BBFFDDwarp is now sponsored for &#33EEBB%duration% &#BBFFDDmore."
+    removed: "&#BBFFDDThe sponsorship of the &#33EEBB%warp% &#BBFFDDwarp was ended."
+  errors:
+    disabled: "&#FF4444Sponsoring warps is disabled!"
+    no-permission: "&#FF4444You do not have permission to buy this sponsorship!"
+    no-warps: "&#FF4444You do not have any warps to sponsor!"
+    choose-warp: "&#FF4444You have multiple warps! Use &#FF0000/pw sponsor <warp> &#FF4444or open the warp editor."
+    already-sponsored: "&#FF4444The &#FF0000%warp% &#FF4444warp is already sponsored!"
+    slots-full: "&#FF4444There are no free sponsor slots right now, try again later!"
+    player-limit: "&#FF4444You can only have &#FF0000%limit% &#FF4444sponsored warp(s) at a time!"
+    not-enough-balance: "&#FF4444You need &#FF0000%price% &#FF4444to buy this sponsorship!"
+    no-currency: "&#FF4444This sponsorship uses a currency that is not available, please tell an admin!"
+    invalid-duration: "&#FF4444Invalid duration! Use values like 30m, 4h, 1d or 1w."
+    not-sponsored: "&#FF4444The &#FF0000%warp% &#FF4444warp is not sponsored!"
+
 time:
   second: "s"
   minute: "m"
@@ -169,4 +194,4 @@ commands:
 update-notifier: "&#88CCFFThere is a new version of AxPlayerWarps available! &#DDDDDD(&#FFFFFFcurrent: &#FF0000%current% &#DDDDDD| &#FFFFFFlatest: &#00FF00%latest%&#DDDDDD)"
 
 # do not change this
-version: 7
+version: 8
