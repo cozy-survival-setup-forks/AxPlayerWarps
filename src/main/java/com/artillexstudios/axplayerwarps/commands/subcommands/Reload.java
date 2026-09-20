@@ -10,6 +10,7 @@ import com.artillexstudios.axplayerwarps.guis.MyWarpsGui;
 import com.artillexstudios.axplayerwarps.guis.RateWarpGui;
 import com.artillexstudios.axplayerwarps.guis.RecentsGui;
 import com.artillexstudios.axplayerwarps.guis.SponsorGui;
+import com.artillexstudios.axplayerwarps.guis.SponsorPickGui;
 import com.artillexstudios.axplayerwarps.guis.WarpsGui;
 import com.artillexstudios.axplayerwarps.sponsor.SponsorConfig;
 import com.artillexstudios.axplayerwarps.guis.WhitelistGui;
@@ -129,6 +130,12 @@ public enum Reload {
             return;
         }
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33EEBB╠ &#99FFDDReloaded &fguis/sponsor.yml&#99FFDD!"));
+
+        if (!SponsorPickGui.reload()) {
+            MESSAGEUTILS.sendLang(sender, "reload.failed", Map.of("%file%", "guis/sponsor-warps.yml"));
+            return;
+        }
+        Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33EEBB╠ &#99FFDDReloaded &fguis/sponsor-warps.yml&#99FFDD!"));
 
         WarpPlaceholders.reload();
         HookManager.updateHooks();

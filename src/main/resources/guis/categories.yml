@@ -9,6 +9,11 @@ rows: 6
 # set to -1 to disable auto updater
 auto-update-ticks: -1
 
+# the sponsorships from sponsor.yml are shown in these slots, in order
+# players click one to sponsor one of their warps
+sponsor-slots:
+  - "11-15"
+
 # ----- ITEMS -----
 
 # you can add as many decorations as you wish

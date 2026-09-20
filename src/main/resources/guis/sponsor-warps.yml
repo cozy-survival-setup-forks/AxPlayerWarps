@@ -1,0 +1,53 @@
+# DOCUMENTATION: https://docs.artillex-studios.com/axplayerwarps.html
+# ITEM BUILDER: https://docs.artillex-studios.com/item-builder.html
+#
+# Shown when a player with more than one warp clicks a sponsorship in the categories menu,
+# so they can pick which warp to sponsor. Clicking a warp buys the sponsorship for it.
+
+title: "&0&lAxPWarps > &8Sponsor which warp?"
+# a gui can have 1-6 rows
+rows: 5
+# should the gui auto update?
+# in ticks, 20 ticks = 1 second
+# set to -1 to disable auto updater
+auto-update-ticks: -1
+
+# the slots the player's warps are placed in, in order
+warp-slots:
+  - "10-16"
+  - "19-25"
+
+warp:
+  name: "&#FFAA00&l%name%"
+  lore:
+    - " "
+    - "&#FFAA00Sponsored: &f%sponsored%"
+    # lines with a %sponsor_...% placeholder are only shown for sponsored warps
+    - "&#FFAA00Time left: &f%sponsor_time_left%"
+    - " "
+    - "&#FFAA00&lClick &#DDDDDD» &#FFDD99Sponsor this Warp"
+
+# ----- ITEMS -----
+
+filler:
+  name: " "
+  slot:
+    - "0-9"
+    - "17-18"
+    - "26-27"
+    - "35-44"
+  type: ORANGE_STAINED_GLASS_PANE
+
+back:
+  slot: 40
+  name: "&#FFAA00&lʙᴀᴄᴋ"
+  type: BARRIER
+  lore:
+    - " "
+    - " &fClick here to go back"
+    - " &fto the previous menu!"
+    - " "
+    - "&#FFAA00&lClick &#DDDDDD» &#FFDD99Go Back"
+  actions:
+    - "[BACK]"
+    - "[SOUND] ui.button.click|1|1"

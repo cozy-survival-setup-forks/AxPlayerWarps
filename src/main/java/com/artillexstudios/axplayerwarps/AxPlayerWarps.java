@@ -31,6 +31,7 @@ import com.artillexstudios.axplayerwarps.guis.MyWarpsGui;
 import com.artillexstudios.axplayerwarps.guis.RateWarpGui;
 import com.artillexstudios.axplayerwarps.guis.RecentsGui;
 import com.artillexstudios.axplayerwarps.guis.SponsorGui;
+import com.artillexstudios.axplayerwarps.guis.SponsorPickGui;
 import com.artillexstudios.axplayerwarps.guis.WarpsGui;
 import com.artillexstudios.axplayerwarps.sponsor.SponsorConfig;
 import com.artillexstudios.axplayerwarps.sponsor.SponsorManager;
@@ -115,6 +116,7 @@ public final class AxPlayerWarps extends AxPlugin {
         BlacklistGui.reload();
         SponsorConfig.load();
         SponsorGui.reload();
+        SponsorPickGui.reload();
 
         WarpPlaceholders.load();
 

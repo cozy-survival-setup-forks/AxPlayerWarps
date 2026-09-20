@@ -4,6 +4,7 @@ import com.artillexstudios.axapi.scheduler.Scheduler;
 import com.artillexstudios.axintegrations.types.CurrencyIntegration;
 import com.artillexstudios.axplayerwarps.AxPlayerWarps;
 import com.artillexstudios.axplayerwarps.api.events.AxPlayerWarpsSponsorEvent;
+import com.artillexstudios.axplayerwarps.guis.SponsorPickGui;
 import com.artillexstudios.axplayerwarps.utils.FormatUtils;
 import com.artillexstudios.axplayerwarps.warps.Warp;
 import com.artillexstudios.axplayerwarps.warps.WarpManager;
@@ -41,6 +42,22 @@ public final class SponsorManager {
                 }
             }
         }, 600L, 600L);
+    }
+
+    /** Starts a purchase when the warp is not chosen yet: the only warp is used, or the player picks one. */
+    public static void choose(Player player, SponsorTier tier) {
+        if (!SponsorConfig.isEnabled()) {
+            MESSAGEUTILS.sendLang(player, "sponsor.errors.disabled");
+            return;
+        }
+        java.util.List<Warp> own = WarpManager.getWarps(player);
+        if (own.isEmpty()) {
+            MESSAGEUTILS.sendLang(player, "sponsor.errors.no-warps");
+        } else if (own.size() == 1) {
+            purchase(player, own.get(0), tier);
+        } else {
+            new SponsorPickGui(player, tier).open();
+        }
     }
 
     /** Checks the rules and takes payment. Runs on the thread of the player who clicked. */

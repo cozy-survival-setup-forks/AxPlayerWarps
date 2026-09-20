@@ -150,6 +150,7 @@ errors:
   transfer-failed: "&#FF4444The &#FF0000%warp% &#FF4444warp couldn't be transferred as &#FF0000%player% &#FF4444has reached their warp limit or they are not accepting transfers!"
 
 sponsor:
+  any-warp: "one of your warps"
   purchased: "&#BBFFDDYour &#33EEBB%warp% &#BBFFDDwarp is now sponsored for &#33EEBB%duration%&#BBFFDD! It has &#33EEBB%time_left% &#BBFFDDleft. &#DDDDDD(%price%)"
   broadcast: "&#FFAA00★ &#33EEBB%player% &#BBFFDDsponsored the &#33EEBB%warp% &#BBFFDDwarp for &#33EEBB%duration%&#BBFFDD! Visit it with &#33EEBB/pw warp %warp%"
   expired: "&#BBFFDDThe sponsorship of your &#33EEBB%warp% &#BBFFDDwarp has ended."

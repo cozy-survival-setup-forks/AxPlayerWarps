@@ -21,6 +21,8 @@ import com.artillexstudios.axplayerwarps.user.WarpUser;
 import com.artillexstudios.axplayerwarps.utils.FormatUtils;
 import com.artillexstudios.axplayerwarps.warps.Warp;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -86,14 +88,15 @@ public class SponsorGui extends GuiFrame<Gui> {
                 slot = free.get(next++);
             }
             if (slot >= gui.getRows() * 9) continue;
-            gui.setItem(slot, tierItem(tier));
+            gui.setItem(slot, new AxGuiItem(tierItem(this, tier, warp), event -> SponsorManager.purchase(player, warp, tier)));
         }
 
         gui.update();
         gui.open(player);
     }
 
-    private AxGuiItem tierItem(SponsorTier tier) {
+    /** The item for a tier. Without a warp, the text says "one of your warps", for menus where it is picked later. */
+    public static ItemStack tierItem(GuiFrame<?> frame, SponsorTier tier, @Nullable Warp warp) {
         CurrencyIntegration integration = CurrencyIntegration.one(tier.currency());
         String price = tier.price() <= 0
                 ? LANG.getString("placeholders.free")
@@ -103,7 +106,7 @@ public class SponsorGui extends GuiFrame<Gui> {
                 "%tier%", tier.id(),
                 "%duration%", SponsorManager.formatDuration(tier.durationMillis()),
                 "%price%", price,
-                "%warp%", warp.getName()
+                "%warp%", warp == null ? LANG.getString("sponsor.any-warp", "one of your warps") : warp.getName()
         );
 
         List<String> lore = new ArrayList<>();
@@ -112,10 +115,10 @@ public class SponsorGui extends GuiFrame<Gui> {
         }
 
         ItemBuilder builder = ItemBuilder.create(tier.material());
-        builder.setName(parseText(replace(tier.name(), values)));
-        builder.setLore(parseText(lore));
+        builder.setName(frame.parseText(replace(tier.name(), values)));
+        builder.setLore(frame.parseText(lore));
         builder.glow(tier.glow());
-        return new AxGuiItem(builder.get(), event -> SponsorManager.purchase(player, warp, tier));
+        return builder.get();
     }
 
     private static String replace(String text, Map<String, String> values) {
