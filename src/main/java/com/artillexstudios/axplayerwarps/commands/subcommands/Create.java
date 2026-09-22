@@ -19,7 +19,10 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.artillexstudios.axplayerwarps.AxPlayerWarps.CONFIG;
 import static com.artillexstudios.axplayerwarps.AxPlayerWarps.MESSAGEUTILS;
@@ -28,46 +31,65 @@ public enum Create {
     INSTANCE;
 
     private final Cooldown<Player> cooldown = Cooldown.create();
+
+    /** Players with a create in progress, so spamming the command cannot pass the limit or balance check twice. */
+    private final Set<UUID> CREATING = ConcurrentHashMap.newKeySet();
+
     public void execute(Player sender, String warpName) {
+        if (!CREATING.add(sender.getUniqueId())) {
+            MESSAGEUTILS.sendLang(sender, "errors.already-creating");
+            return;
+        }
+
+        boolean pending = false;
+        try {
+            pending = doExecute(sender, warpName);
+        } finally {
+            if (!pending) CREATING.remove(sender.getUniqueId());
+        }
+    }
+
+    /** @return true when a warp is being created async: the player stays locked until it is done */
+    private boolean doExecute(Player sender, String warpName) {
         WarpUser user = Users.get(sender);
         long limit = user.getWarpLimit();
         long warps = WarpManager.getWarps(sender).size();
         if (limit <= warps) {
             MESSAGEUTILS.sendLang(sender, "errors.limit-reached",
                     Map.of("%current%", "" + warps, "%limit%", "" + limit));
-            return;
+            return false;
         }
 
         Location warpLocation = sender.getLocation();
         if (SimpleRegex.matches(CONFIG.getStringList("disallowed-worlds"), warpLocation.getWorld().getName())) {
             MESSAGEUTILS.sendLang(sender, "errors.disallowed-world");
-            return;
+            return false;
         }
 
         if (!ProtectionIntegration.hasPermission(sender, warpLocation, ProtectionIntegration.Permission.BREAK)) {
             MESSAGEUTILS.sendLang(sender, "errors.cannot-create-here");
-            return;
+            return false;
         }
 
         switch (WarpNameUtils.isAllowed(warpName)) {
             case DISALLOWED -> {
                 MESSAGEUTILS.sendLang(sender, "errors.disallowed-name-blacklisted");
-                return;
+                return false;
             }
             case CONTAINS_SPACES -> {
                 MESSAGEUTILS.sendLang(sender, "errors.disallowed-name-space");
-                return;
+                return false;
             }
             case INVALID_LENGTH -> {
                 MESSAGEUTILS.sendLang(sender, "errors.disallowed-name-length");
-                return;
+                return false;
             }
         }
 
         Warp foundWarp = WarpManager.getWarp(warpName, CONFIG.getBoolean("warp-naming.case-sensitive", false));
         if (foundWarp != null) {
             MESSAGEUTILS.sendLang(sender, "errors.name-exists");
-            return;
+            return false;
         }
 
         Warp warp = new Warp(
@@ -92,7 +114,7 @@ public enum Create {
 
         AxPlayerWarpsPreCreateEvent preCreateEvent = new AxPlayerWarpsPreCreateEvent(sender, warp, price);
         Bukkit.getServer().getPluginManager().callEvent(preCreateEvent);
-        if (preCreateEvent.isCancelled()) return;
+        if (preCreateEvent.isCancelled()) return false;
         price = preCreateEvent.getCreationPrice();
 
         CurrencyIntegration integration;
@@ -106,7 +128,7 @@ public enum Create {
                     MESSAGEUTILS.sendLang(sender, "errors.create-not-enough-currency", Map.of(
                             "%price%", FormatUtils.formatCurrency(integration, price)
                     ));
-                    return;
+                    return false;
                 }
                 // confirmation
                 if (CONFIG.getBoolean("warp-creation-cost.confirm", true) && !cooldown.hasCooldown(sender)) {
@@ -114,7 +136,7 @@ public enum Create {
                     MESSAGEUTILS.sendLang(sender, "create.confirm", Map.of(
                             "%price%", FormatUtils.formatCurrency(integration, price)
                     ));
-                    return;
+                    return false;
                 }
                 future = integration.takeBalance(sender.getUniqueId(), price);
             }
@@ -122,22 +144,34 @@ public enum Create {
             integration = null;
         }
 
+        // name and limit were checked above but nothing is reserved yet, so the lock stays held
+        // until the warp is actually in WarpManager: a second /warp create cannot slip through.
         final double finalPrice = price;
-        future.thenAccept(success -> {
-            if (!success) return;
+        final UUID senderId = sender.getUniqueId();
+        future.whenComplete((success, error) -> {
+            if (error != null || !Boolean.TRUE.equals(success)) {
+                CREATING.remove(senderId);
+                return;
+            }
 
             AxPlayerWarpsCreateEvent createEvent = new AxPlayerWarpsCreateEvent(sender, warp, finalPrice);
             Bukkit.getServer().getPluginManager().callEvent(createEvent);
 
             AxPlayerWarps.getThreadedQueue().submit(() -> {
-                int id = AxPlayerWarps.getDatabase().createWarp(sender, warpLocation, warpName);
-                warp.setId(id);
-                MESSAGEUTILS.sendLang(sender, "create.created", Map.of(
-                        "%warp%", warpName,
-                        "%price%", FormatUtils.formatCurrency(integration, finalPrice)
-                ));
-                WarpManager.getWarps().add(warp);
+                try {
+                    int id = AxPlayerWarps.getDatabase().createWarp(sender, warpLocation, warpName);
+                    warp.setId(id);
+                    MESSAGEUTILS.sendLang(sender, "create.created", Map.of(
+                            "%warp%", warpName,
+                            "%price%", FormatUtils.formatCurrency(integration, finalPrice)
+                    ));
+                    WarpManager.getWarps().add(warp);
+                } finally {
+                    CREATING.remove(senderId);
+                }
             });
         });
+
+        return true;
     }
 }

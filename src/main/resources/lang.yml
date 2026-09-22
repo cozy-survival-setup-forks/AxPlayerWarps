@@ -145,6 +145,7 @@ errors:
   moved: "&#FF4444You have moved, so the teleport was cancelled!"
   not-found: "&#FF4444Warp with name &#FF0000%warp% &#FF4444not found!"
   limit-reached: "&#FF4444You have reached the warp limit, you can not create any more warps! &#FF4444(&#FF0000%current%&#FF4444/&#EE0000%limit%&#FF4444)"
+  already-creating: "&#FF4444Your last warp is still being created, please wait!"
   nothing-withdrawable: "&#FF4444There is no money to be withdrawn!"
   not-your-warp: "&#FF4444This is not your warp!"
   transfer-failed: "&#FF4444The &#FF0000%warp% &#FF4444warp couldn't be transferred as &#FF0000%player% &#FF4444has reached their warp limit or they are not accepting transfers!"
